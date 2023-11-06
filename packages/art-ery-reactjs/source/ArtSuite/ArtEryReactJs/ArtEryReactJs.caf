@@ -1,0 +1,54 @@
+import &react, &ArtClassSystem, &ArtStandardLib, &@ArtSuite/ArtModels, &@ArtSuite/ArtPipelineModels
+
+class SubscriptionObject extends ArtModelSubscriptionsMixin BaseObject
+  constructor: (@setSubscriptionState) -> @_state = {}
+  setState: (key, value) -> @setSubscriptionState @_state = objectWith @_state, key, value
+
+makeSubscriberHook = (modelName) ->
+  unless models[modelName]
+    throw new Error "" invalid model name: ${JSON.stringify(modelName)}. Valid models names: #{} Object.keys(models).join ', '
+
+  (key) ->
+    switch
+    when isString key then
+    when isPlainObject key
+      props = key
+      initialModelRecord = props[modelName]
+      model = models[modelName]
+      key = if initialModelRecord then model.toKeyString initialModelRecord else props[modelName + :Id]
+
+    else throw new Error "" Expecting first argument to be a key (string) or props (plain-object). Got: #{} formattedInspect key
+
+    [subscriptionState, setSubscriptionState] = useState {}
+
+    useEffect
+      ->
+        subscriptionObject = new class SubscriptionObject setSubscriptionState
+        .subscribe {} modelName, key, initialModelRecord, stateField: modelName
+        -> subscriptionObject.unsubscribeAll()
+
+      [] key
+
+    subscriptionState
+
+getSubscriptionHooks = (models) ->
+  object v, name from models with-key lowerCamelCase "" use #{name}
+    makeSubscriberHook name
+
+registerClasses = (PipelineClasses, pipelineRegistry) ->
+  each PipelineClass in PipelineClasses
+    PipelineClass.registry pipelineRegistry
+    PipelineClass.postCreateConcreteClass {}
+
+initArtEry: (PipelineClasses) ->
+  global.pipelineRegistry = pipelineRegistry = new PipelineRegistry
+
+  ArtConfig.configure()
+  registerClasses PipelineClasses
+  pipelineRegistry.session.loadSession()
+
+  {}
+    models = global.models = defineModelsForAllPipelines pipelineRegistry
+    subscriptions = getSubscriptionHooks(models);
+    pipelines = global.pipeline = pipelineRegistry.pipelines
+    pipelineRegistry

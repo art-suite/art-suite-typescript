@@ -1,0 +1,8 @@
+import &ArtStandardLib
+
+[]
+  &ArtStandardLib
+  &ArtClassSystem
+  &ArtCommunicationStatus
+  &ArtTestbench
+  &build
