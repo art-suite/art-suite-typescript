@@ -4,6 +4,8 @@
 (module.exports = require('./namespace'))
 
 .addModules({
-  ArtEryReactJsTest: require('./ArtEryReactJs.test'),
-  StandardImport:    require('./StandardImport')
+  ArtEryReactJsTest:        require('./ArtEryReactJs.test'),
+  CreateJavaScriptPipeline: require('./createJavaScriptPipeline'),
+  JavaScriptPipelineLib:    require('./JavaScriptPipelineLib'),
+  StandardImport:           require('./StandardImport')
 });

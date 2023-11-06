@@ -1,3 +1,15 @@
-import &StandardImport
-test "foo" ->
-  assert.eq 1, 2
+import &StandardImport, &JavaScriptPipelineLib
+
+test "initArtEry with one class" ->
+  {models, pipelines, pipelineRegistry, subscriptions} = initArtEry [] createJavaScriptPipeline()
+  assert.eq
+    Object.keys pipelines
+    [] :user
+
+  assert.eq
+    Object.keys models
+    [] :user
+
+  assert.eq
+    Object.keys subscriptions
+    [] :useUser
