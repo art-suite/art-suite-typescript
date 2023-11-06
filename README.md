@@ -1,4 +1,4 @@
-# Art-Suite-Typescript MonoRepo
+# Art-Suite-Typescript Monorepo
 
 This monorepo tunes the ArtSuite to work wonderfully for TypeScript users.
 
@@ -21,6 +21,6 @@ Sub Goals:
 
 ### Benefits
 
-Basically, it you should only need to create one, small file per DB-Table for your entire stack. The API, server, client, PrismaSchema, OpenAPI definition should all be managed by ArtEry.
+Basically, you should only need to create one, small file per DB-Table for your entire stack. The API, server, client, PrismaSchema, OpenAPI definition should all be managed by ArtEry.
 
 And, while this is a 'low-code' solution, it is also powerfully extensible. ArtPipelines provides a superior platform for developing data pipelines compared to the status quo. With far less code you can implement far more capable systems.
