@@ -4,9 +4,14 @@ class SubscriptionObject extends ArtModelSubscriptionsMixin BaseObject
   constructor: (@setSubscriptionState) -> @_state = {}
   setState: (key, value) -> @setSubscriptionState @_state = objectWith @_state, key, value
 
-makeSubscriberHook = (modelName) ->
+makeSubscriberHook = (modelName, modelRegistry) ->
+  modelRegistry extract models
   unless models[modelName]
-    throw new Error "" invalid model name: ${JSON.stringify(modelName)}. Valid models names: #{} Object.keys(models).join ', '
+    log {} (new Error).stack
+    throw new Error "" invalid model name: #{JSON.stringify modelName}. Valid models names: #{}
+      if (keys = Object.keys models).length == 0
+        "" (no models defined)
+      else keys.join ', '
 
   (key) ->
     if isPlainObject key
@@ -23,16 +28,19 @@ makeSubscriberHook = (modelName) ->
     useEffect
       ->
         subscriptionObject = new SubscriptionObject setSubscriptionState
-        .subscribe {} modelName, key, initialModelRecord, stateField: modelName
+        subscriptionObject.extendModelRegistry modelRegistry
+        subscriptionObject.subscribe {} modelName, key, initialModelRecord, stateField: modelName
         -> subscriptionObject.unsubscribeAll()
 
       [] key
 
     subscriptionState
 
-getSubscriptionHooks = (models) ->
+getSubscriptionHooks = (modelRegistry) ->
+  modelRegistry extract models
+  log getSubscriptionHooks: {} models
   object v, name from models with-key lowerCamelCase "" use #{name}
-    makeSubscriberHook name
+    makeSubscriberHook name, modelRegistry
 
 registerClasses = (PipelineClasses, pipelineRegistry) ->
   each PipelineClass in PipelineClasses
@@ -40,14 +48,19 @@ registerClasses = (PipelineClasses, pipelineRegistry) ->
     PipelineClass.postCreateConcreteClass {}
 
 initArtEry: (PipelineClasses) ->
+  global.modelRegistry = modelRegistry = new ModelRegistry
   global.pipelineRegistry = pipelineRegistry = new PipelineRegistry
+
+  log initArtEryA: {} PipelineClasses
 
   ArtConfig.configure()
   registerClasses PipelineClasses, pipelineRegistry
+  log initArtEryB: {} pipelineRegistry
   pipelineRegistry.session.loadSession()
 
   {}
-    models = global.models = defineModelsForAllPipelines pipelineRegistry
-    subscriptions = getSubscriptionHooks(models);
+    models = log global.models = defineModelsForAllPipelines pipelineRegistry, modelRegistry
+    subscriptions = getSubscriptionHooks modelRegistry
     pipelines = global.pipeline = pipelineRegistry.pipelines
     pipelineRegistry
+    modelRegistry
